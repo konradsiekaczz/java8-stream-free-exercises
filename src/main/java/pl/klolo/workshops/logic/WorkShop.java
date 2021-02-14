@@ -131,21 +131,38 @@ class WorkShop {
      * Zwraca liczbę wszystkich pracowników we wszystkich firmach.
      */
     long getAllUserAmount() {
-        return -1;
+
+        int numberOfAllUsersFromAllCompanies = 0;
+        for (Holding holding : holdings) {
+            for (Company company : holding.getCompanies()) {
+                numberOfAllUsersFromAllCompanies += company.getUsers().size();
+            }
+        }
+        return numberOfAllUsersFromAllCompanies;
     }
 
     /**
      * Zwraca liczbę wszystkich pracowników we wszystkich firmach. Napisz to za pomocą strumieni.
      */
     long getAllUserAmountAsStream() {
-        return -1;
+
+        return holdings.stream()
+                .flatMap(holding -> holding.getCompanies().stream())
+                .mapToLong(company -> company.getUsers().size())
+                .sum();
     }
 
     /**
      * Zwraca listę wszystkich nazw firm w formie listy.
      */
     List<String> getAllCompaniesNames() {
-        return null;
+        List<String> namesOfCompanies = new ArrayList<>();
+        for (Holding holding : holdings) {
+            for (Company company : holding.getCompanies()) {
+                namesOfCompanies.add(company.getName());
+            }
+        }
+        return namesOfCompanies;
     }
 
     /**
@@ -153,7 +170,21 @@ class WorkShop {
      * pomocą strumieni.
      */
     List<String> getAllCompaniesNamesAsStream() {
-        return null;
+        return getCompaniesInStream()
+                .map(company -> company.getName())
+                .collect(Collectors.toList());
+
+        //or
+//        return holdings.stream()
+//                .flatMap(holding -> holding.getCompanies().stream())
+//                .map(Company::getName)
+//                .collect(Collectors.toList());
+    }
+
+    private Stream<Company> getCompaniesInStream() {
+        return holdings.stream()
+                .flatMap(holding -> holding.getCompanies().stream());
+
     }
 
     /**
