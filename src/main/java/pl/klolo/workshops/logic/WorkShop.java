@@ -191,7 +191,14 @@ class WorkShop {
      * Zwraca listę wszystkich firm jako listę, której implementacja to LinkedList.
      */
     LinkedList<String> getAllCompaniesNamesAsLinkedList() {
-        return null;
+        LinkedList<String> allCompaniesNames = new LinkedList<>();
+        for (Holding holding : holdings) {
+            for (Company company : holding.getCompanies()) {
+                allCompaniesNames.add(company.getName());
+            }
+
+        }
+        return allCompaniesNames;
     }
 
     /**
@@ -199,14 +206,29 @@ class WorkShop {
      * pomocą strumieni.
      */
     LinkedList<String> getAllCompaniesNamesAsLinkedListAsStream() {
-        return null;
+        return getCompaniesInStream()
+                .map(Company::getName)
+                .collect(Collectors.toCollection(LinkedList::new));
     }
 
     /**
      * Zwraca listę firm jako string gdzie poszczególne firmy są oddzielone od siebie znakiem "+"
      */
     String getAllCompaniesNamesAsString() {
-        return null;
+        List<String> namesOfAllCompany = getCompaniesInStream()
+                .map(Company::getName)
+                .collect(Collectors.toList());
+        StringBuilder result = new StringBuilder();
+        int numberOfCompaniesNames = namesOfAllCompany.size();
+        int count = 0;
+        for (String name : namesOfAllCompany) {
+            result.append(name);
+            count++;
+            if (count< numberOfCompaniesNames){
+                result.append("+");
+            }
+        }
+        return result.toString();
     }
 
     /**
