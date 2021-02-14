@@ -171,7 +171,7 @@ class WorkShop {
      */
     List<String> getAllCompaniesNamesAsStream() {
         return getCompaniesInStream()
-                .map(company -> company.getName())
+                .map(Company::getName)
                 .collect(Collectors.toList());
 
         //or
