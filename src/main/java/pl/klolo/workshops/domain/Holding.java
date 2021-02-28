@@ -12,4 +12,8 @@ import java.util.List;
 public class Holding {
     private final String name;
     private final List<Company> companies;
+
+    public List<Company> getCompanies() {
+        return companies;
+    }
 }
