@@ -1,6 +1,7 @@
 package pl.klolo.workshops.logic;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -318,12 +319,20 @@ class WorkShop {
      */
 
     String getAllCurrenciesUsingGenerate() {
-        return null;
+        List<String> currencies = getAllCurrenciesAsList();
+        return Stream.generate(currencies.iterator()::next)
+                .collect(Collectors.joining(", "));
     }
-//        return Stream.generate()
-//                .sorted(Comparator.comparing(Enum::toString))
-//                .collect(Co);
-//    }
+
+    private List<String> getAllCurrenciesAsList(){
+        return getCompanyStream()
+                .flatMap(company -> company.getUsers().stream())
+                .flatMap(user -> user.getAccounts().stream())
+                .map(account -> account.getCurrency().toString())
+                .sorted(String::compareTo)
+                .distinct()
+                .collect(Collectors.toCollection(ArrayList::new));
+    }
 
     /**
      * Zwraca liczbę kobiet we wszystkich firmach.
@@ -359,7 +368,22 @@ class WorkShop {
      * Przelicza kwotę na rachunku na złotówki za pomocą kursu określonego w enum Currency. Ustaw precyzje na 3 miejsca po przecinku.
      */
     BigDecimal getAccountAmountInPLN(final Account account) {
-        return null;
+
+        for (Holding h: holdings) {
+            for (Company c: h.getCompanies()) {
+                for (User u : c.getUsers()) {
+                    for (Account a: u.getAccounts()) {
+//                        for (Currency cu: a.getCurrency()) {
+
+//                        }
+                    }
+                }
+            }
+        }
+
+
+        return account.getAmount()
+                .multiply(BigDecimal.valueOf(account.getCurrency().rate)).setScale(3, RoundingMode.HALF_DOWN);
     }
 
 
@@ -367,7 +391,8 @@ class WorkShop {
      * Przelicza kwotę na rachunku na złotówki za pomocą kursu określonego w enum Currency. Napisz to za pomocą strumieni.
      */
     BigDecimal getAccountAmountInPLNAsStream(final Account account) {
-        return null;
+        return account.getAmount()
+                .multiply(BigDecimal.valueOf(account.getCurrency().rate)).setScale(3, RoundingMode.HALF_DOWN);
     }
 
     /**
@@ -736,7 +761,7 @@ class WorkShop {
     /**
      * Tworzy strumień rachunków.
      */
-    private Stream<Account> getAccoutStream() {
+    private Stream<Account> getAccountStream() {
         return null;
     }
 
