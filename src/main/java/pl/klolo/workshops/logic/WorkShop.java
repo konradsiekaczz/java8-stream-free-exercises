@@ -425,21 +425,52 @@ class WorkShop {
      * Zwraca imiona użytkowników w formie zbioru, którzy spełniają podany warunek.
      */
     Set<String> getUsersForPredicate(final Predicate<User> userPredicate) {
-        return null;
+        Set<String> usersNamesFromPredicate = new HashSet<>();
+        for (Holding holding: holdings) {
+            for (Company company: holding.getCompanies()) {
+                for (User user: company.getUsers()) {
+                    if(userPredicate.test(user)){
+                        usersNamesFromPredicate.add(user.getFirstName());
+                    }
+                }
+            }
+        }
+        System.out.println(usersNamesFromPredicate);
+        return usersNamesFromPredicate;
+    }
+
+    /**
+     * Zwraca imię użytkownika jeśli spełnia podany warunek.
+     */
+    private Predicate<User> allUserWithNameStartAtM(){
+        return user -> user.getFirstName().startsWith("M");
     }
 
     /**
      * Zwraca imiona użytkowników w formie zbioru, którzy spełniają podany warunek. Napisz to za pomocą strumieni.
      */
     Set<String> getUsersForPredicateAsStream(final Predicate<User> userPredicate) {
-        return null;
+        return getUserStream()
+                .filter(userPredicate)
+                .map(User::getFirstName)
+                .collect(Collectors.toSet());
     }
 
     /**
      * Metoda filtruje użytkowników starszych niż podany jako parametr wiek, wyświetla ich na konsoli, odrzuca mężczyzn i zwraca ich imiona w formie listy.
      */
     List<String> getOldWoman(final int age) {
-        return null;
+        List<String> womensOlderThanSpecificAge = new ArrayList<>();
+        for (Holding holiding:holdings) {
+            for (Company company:holiding.getCompanies()) {
+                for (User user: company.getUsers()) {
+                    if(user.getAge()>age && user.getSex().equals(Sex.WOMAN)){
+                        womensOlderThanSpecificAge.add(user.getFirstName());
+                    }
+                }
+            }
+        }
+        return womensOlderThanSpecificAge;
     }
 
     /**
@@ -447,7 +478,10 @@ class WorkShop {
      * to za pomocą strumieni.
      */
     List<String> getOldWomanAsStream(final int age) {
-        return null;
+        return getUserStream()
+                .filter(user -> user.getAge()>age && user.getSex().equals(Sex.WOMAN))
+                .map(user -> user.getFirstName())
+                .collect(Collectors.toList());
     }
 
     /**
