@@ -368,22 +368,21 @@ class WorkShop {
      * Przelicza kwotę na rachunku na złotówki za pomocą kursu określonego w enum Currency. Ustaw precyzje na 3 miejsca po przecinku.
      */
     BigDecimal getAccountAmountInPLN(final Account account) {
-
-        for (Holding h: holdings) {
-            for (Company c: h.getCompanies()) {
-                for (User u : c.getUsers()) {
-                    for (Account a: u.getAccounts()) {
-//                        for (Currency cu: a.getCurrency()) {
-
-//                        }
-                    }
-                }
-            }
-        }
-
-
         return account.getAmount()
                 .multiply(BigDecimal.valueOf(account.getCurrency().rate)).setScale(3, RoundingMode.HALF_DOWN);
+
+//        BigDecimal amount = null;
+//        for (Holding h: holdings) {
+//            for (Company c: h.getCompanies()) {
+//                for (User u : c.getUsers()) {
+//                    for (Account a: u.getAccounts()) {
+//                         amount = a.getAmount().multiply(BigDecimal.valueOf(a.getCurrency().rate));
+//                    }
+//                }
+//            }
+//        }
+//        return amount;
+
     }
 
 
@@ -391,22 +390,35 @@ class WorkShop {
      * Przelicza kwotę na rachunku na złotówki za pomocą kursu określonego w enum Currency. Napisz to za pomocą strumieni.
      */
     BigDecimal getAccountAmountInPLNAsStream(final Account account) {
-        return account.getAmount()
-                .multiply(BigDecimal.valueOf(account.getCurrency().rate)).setScale(3, RoundingMode.HALF_DOWN);
+
+        return  Stream.of(account)
+                .map(account1 -> account1.getAmount().multiply(BigDecimal.valueOf(account.getCurrency().rate)).setScale(3,RoundingMode.HALF_DOWN))
+                .findFirst()
+                .get();
+
+//        return account.getAmount()
+//                .multiply(BigDecimal.valueOf(account.getCurrency().rate)).setScale(3, RoundingMode.HALF_DOWN);
     }
 
     /**
      * Przelicza kwotę na podanych rachunkach na złotówki za pomocą kursu określonego w enum Currency  i sumuje ją.
      */
     BigDecimal getTotalCashInPLN(final List<Account> accounts) {
-        return null;
+
+        BigDecimal amount = BigDecimal.ZERO;
+        for (Account a: accounts) {
+            amount = amount.add(a.getAmount().multiply(BigDecimal.valueOf(a.getCurrency().rate)));
+        }
+        return amount;
     }
 
     /**
      * Przelicza kwotę na podanych rachunkach na złotówki za pomocą kursu określonego w enum Currency  i sumuje ją. Napisz to za pomocą strumieni.
      */
     BigDecimal getTotalCashInPLNAsStream(final List<Account> accounts) {
-        return null;
+        return accounts.stream()
+                .map(account -> account.getAmount().multiply(BigDecimal.valueOf(account.getCurrency().rate)))
+                .reduce(new BigDecimal("0.0"), BigDecimal::add);
     }
 
     /**
