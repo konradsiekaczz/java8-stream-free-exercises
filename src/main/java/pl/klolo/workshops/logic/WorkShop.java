@@ -13,6 +13,7 @@ import java.util.stream.Stream;
 import pl.klolo.workshops.domain.*;
 import pl.klolo.workshops.domain.Currency;
 import pl.klolo.workshops.mock.HoldingMockGenerator;
+//import sun.jvm.hotspot.ui.tree.FloatTreeNodeAdapter;
 
 class WorkShop {
     /**
@@ -488,13 +489,37 @@ class WorkShop {
      * Dla każdej firmy uruchamia przekazaną metodę.
      */
     void executeForEachCompany(final Consumer<Company> consumer) {
-        throw new IllegalArgumentException();
+         getCompaniesInStream()
+                .forEach(consumer);
     }
 
     /**
      * Wyszukuje najbogatsza kobietę i zwraca ja. Metoda musi uzwględniać to że rachunki są w różnych walutach.
      */
     Optional<User> getRichestWoman() {
+        List<Integer> accounts = new ArrayList<>();
+        Map<String, Float> usersWithTotalMonet = new HashMap<>();
+        BigDecimal amount = BigDecimal.ZERO;
+        float amountFromAllAccounts = 0;
+        for (Holding holding: holdings) {
+            for (Company company:holding.getCompanies()) {
+                for (User user: company.getUsers()) {
+                    if (user.getSex().equals(Sex.WOMAN)){
+                        for (Account account: user.getAccounts()) {
+                            accounts.add(account.getAmount().intValue());
+                            amountFromAllAccounts = amount.add(account.getAmount().multiply(BigDecimal.valueOf(account.getCurrency().rate))).floatValue();
+                            System.out.println(user.getFirstName() + user.getLastName());
+                            usersWithTotalMonet.put(user.getFirstName(),amountFromAllAccounts);
+                        }
+                        amountFromAllAccounts = 0;
+                    }
+                }
+            }
+        }
+
+        System.out.println(accounts);
+        System.out.println(amountFromAllAccounts);
+        System.out.println(usersWithTotalMonet);
         return null;
     }
 
