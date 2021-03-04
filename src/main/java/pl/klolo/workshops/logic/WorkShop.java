@@ -325,7 +325,7 @@ class WorkShop {
                 .collect(Collectors.joining(", "));
     }
 
-    private List<String> getAllCurrenciesAsList(){
+    private List<String> getAllCurrenciesAsList() {
         return getCompanyStream()
                 .flatMap(company -> company.getUsers().stream())
                 .flatMap(user -> user.getAccounts().stream())
@@ -392,8 +392,8 @@ class WorkShop {
      */
     BigDecimal getAccountAmountInPLNAsStream(final Account account) {
 
-        return  Stream.of(account)
-                .map(account1 -> account1.getAmount().multiply(BigDecimal.valueOf(account.getCurrency().rate)).setScale(3,RoundingMode.HALF_DOWN))
+        return Stream.of(account)
+                .map(account1 -> account1.getAmount().multiply(BigDecimal.valueOf(account.getCurrency().rate)).setScale(3, RoundingMode.HALF_DOWN))
                 .findFirst()
                 .get();
 
@@ -407,7 +407,7 @@ class WorkShop {
     BigDecimal getTotalCashInPLN(final List<Account> accounts) {
 
         BigDecimal amount = BigDecimal.ZERO;
-        for (Account a: accounts) {
+        for (Account a : accounts) {
             amount = amount.add(a.getAmount().multiply(BigDecimal.valueOf(a.getCurrency().rate)));
         }
         return amount;
@@ -427,10 +427,10 @@ class WorkShop {
      */
     Set<String> getUsersForPredicate(final Predicate<User> userPredicate) {
         Set<String> usersNamesFromPredicate = new HashSet<>();
-        for (Holding holding: holdings) {
-            for (Company company: holding.getCompanies()) {
-                for (User user: company.getUsers()) {
-                    if(userPredicate.test(user)){
+        for (Holding holding : holdings) {
+            for (Company company : holding.getCompanies()) {
+                for (User user : company.getUsers()) {
+                    if (userPredicate.test(user)) {
                         usersNamesFromPredicate.add(user.getFirstName());
                     }
                 }
@@ -443,7 +443,7 @@ class WorkShop {
     /**
      * Zwraca imię użytkownika jeśli spełnia podany warunek.
      */
-    private Predicate<User> allUserWithNameStartAtM(){
+    private Predicate<User> allUserWithNameStartAtM() {
         return user -> user.getFirstName().startsWith("M");
     }
 
@@ -462,10 +462,10 @@ class WorkShop {
      */
     List<String> getOldWoman(final int age) {
         List<String> womensOlderThanSpecificAge = new ArrayList<>();
-        for (Holding holiding:holdings) {
-            for (Company company:holiding.getCompanies()) {
-                for (User user: company.getUsers()) {
-                    if(user.getAge()>age && user.getSex().equals(Sex.WOMAN)){
+        for (Holding holiding : holdings) {
+            for (Company company : holiding.getCompanies()) {
+                for (User user : company.getUsers()) {
+                    if (user.getAge() > age && user.getSex().equals(Sex.WOMAN)) {
                         womensOlderThanSpecificAge.add(user.getFirstName());
                     }
                 }
@@ -480,7 +480,7 @@ class WorkShop {
      */
     List<String> getOldWomanAsStream(final int age) {
         return getUserStream()
-                .filter(user -> user.getAge()>age && user.getSex().equals(Sex.WOMAN))
+                .filter(user -> user.getAge() > age && user.getSex().equals(Sex.WOMAN))
                 .map(user -> user.getFirstName())
                 .collect(Collectors.toList());
     }
@@ -489,7 +489,7 @@ class WorkShop {
      * Dla każdej firmy uruchamia przekazaną metodę.
      */
     void executeForEachCompany(final Consumer<Company> consumer) {
-         getCompaniesInStream()
+        getCompaniesInStream()
                 .forEach(consumer);
     }
 
@@ -497,51 +497,74 @@ class WorkShop {
      * Wyszukuje najbogatsza kobietę i zwraca ja. Metoda musi uzwględniać to że rachunki są w różnych walutach.
      */
     Optional<User> getRichestWoman() {
-        List<Integer> accounts = new ArrayList<>();
-        Map<String, Float> usersWithTotalMonet = new HashMap<>();
+        Map<User, Float> usersWithTotalMonet = new HashMap<>();
         BigDecimal amount = BigDecimal.ZERO;
         float amountFromAllAccounts = 0;
-        for (Holding holding: holdings) {
-            for (Company company:holding.getCompanies()) {
-                for (User user: company.getUsers()) {
-                    if (user.getSex().equals(Sex.WOMAN)){
-                        for (Account account: user.getAccounts()) {
-                            accounts.add(account.getAmount().intValue());
-                            amountFromAllAccounts = amount.add(account.getAmount().multiply(BigDecimal.valueOf(account.getCurrency().rate))).floatValue();
-                            System.out.println(user.getFirstName() + user.getLastName());
-                            usersWithTotalMonet.put(user.getFirstName(),amountFromAllAccounts);
+        for (Holding holding : holdings) {
+            for (Company company : holding.getCompanies()) {
+                for (User user : company.getUsers()) {
+                    if (user.getSex().equals(Sex.WOMAN)) {
+                        for (Account account : user.getAccounts()) {
+                            amountFromAllAccounts += amount.add(account.getAmount().multiply(BigDecimal.valueOf(account.getCurrency().rate))).floatValue();
                         }
+                        usersWithTotalMonet.put(user, amountFromAllAccounts);
                         amountFromAllAccounts = 0;
                     }
                 }
             }
         }
 
-        System.out.println(accounts);
-        System.out.println(amountFromAllAccounts);
-        System.out.println(usersWithTotalMonet);
-        return null;
+        Map.Entry<User, Float> maxEntry = null;
+
+        for (Map.Entry<User, Float> entry : usersWithTotalMonet.entrySet()) {
+            if (maxEntry == null || entry.getValue().compareTo(maxEntry.getValue()) > 0) {
+                maxEntry = entry;
+            }
+        }
+
+        Optional<User> reachestWomen = Optional.ofNullable(maxEntry.getKey());
+        return reachestWomen;
     }
 
     /**
      * Wyszukuje najbogatsza kobietę i zwraca ja. Metoda musi uzwględniać to że rachunki są w różnych walutach. Napisz to za pomocą strumieni.
      */
-    Optional<User> getRichestWomanAsStream() {
-        return null;
-    }
+//    Optional<User> getRichestWomanAsStream() {
+//        return getUserStream()
+//                .filter(isWoman)
+//                .flatMap(user -> user.getAccounts().stream())
+//                .map(this::getAccountAmountInPLN)
+//                .reduce(BigDecimal.ZERO, BigDecimal::add)
+//                .max(;
+//
+//
+//    }
 
     /**
      * Zwraca nazwy pierwszych N firm. Kolejność nie ma znaczenia.
      */
     Set<String> getFirstNCompany(final int n) {
-        return null;
+        Set<String> companies = new HashSet<>();
+
+        for (Holding holding : holdings) {
+            for (Company company : holding.getCompanies()) {
+                if (companies.size() == n) {
+                    return companies;
+                }
+                companies.add(company.getName());
+            }
+        }
+        return companies;
     }
 
     /**
      * Zwraca nazwy pierwszych N firm. Kolejność nie ma znaczenia. Napisz to za pomocą strumieni.
      */
     Set<String> getFirstNCompanyAsStream(final int n) {
-        return null;
+        return getCompaniesInStream()
+                .map(company -> company.getName())
+                .limit(n)
+                .collect(Collectors.toSet());
     }
 
     /**
